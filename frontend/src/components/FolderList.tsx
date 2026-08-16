@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { formatBytes, formatDate } from '@/lib/utils';
+import { formatBytes, formatDate, formatRelativeTime } from '@/lib/utils';
 import type { FileNode, FolderNode } from '@/types';
 
 interface Actions {
@@ -71,8 +71,11 @@ export function FolderList({
                 {folder.totalItemCount} item{folder.totalItemCount === 1 ? '' : 's'} &middot;{' '}
                 {formatBytes(folder.totalSizeBytes)}
               </td>
-              <td className="px-4 py-2.5 text-muted-foreground">
-                {formatDate(folder.updatedAt)}
+              <td
+                className="px-4 py-2.5 text-muted-foreground"
+                title={formatDate(folder.updatedAt)}
+              >
+                {formatRelativeTime(folder.updatedAt)}
               </td>
               <td className="px-4 py-2.5 text-right">
                 {!actions.readOnly && (
@@ -117,7 +120,9 @@ export function FolderList({
                 </button>
               </td>
               <td className="px-4 py-2.5 text-muted-foreground">{formatBytes(file.sizeBytes)}</td>
-              <td className="px-4 py-2.5 text-muted-foreground">{formatDate(file.updatedAt)}</td>
+              <td className="px-4 py-2.5 text-muted-foreground" title={formatDate(file.updatedAt)}>
+                {formatRelativeTime(file.updatedAt)}
+              </td>
               <td className="px-4 py-2.5 text-right">
                 {!actions.readOnly && (
                   <DropdownMenu>

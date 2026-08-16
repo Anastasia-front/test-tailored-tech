@@ -11,7 +11,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { EmptyState } from '@/components/EmptyState';
 import { api, ApiError } from '@/lib/api';
-import { formatBytes, formatDate } from '@/lib/utils';
+import { formatBytes, formatDate, formatRelativeTime } from '@/lib/utils';
 import type { FileNode, FolderContents } from '@/types';
 
 type PublicRoot =
@@ -144,8 +144,11 @@ export function PublicSharePage() {
                     <td className="px-4 py-2.5 text-muted-foreground">
                       {formatBytes(f.totalSizeBytes)}
                     </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">
-                      {formatDate(f.updatedAt)}
+                    <td
+                      className="px-4 py-2.5 text-muted-foreground"
+                      title={formatDate(f.updatedAt)}
+                    >
+                      {formatRelativeTime(f.updatedAt)}
                     </td>
                   </tr>
                 ))}
@@ -162,8 +165,11 @@ export function PublicSharePage() {
                     <td className="px-4 py-2.5 text-muted-foreground">
                       {formatBytes(f.sizeBytes)}
                     </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">
-                      {formatDate(f.updatedAt)}
+                    <td
+                      className="px-4 py-2.5 text-muted-foreground"
+                      title={formatDate(f.updatedAt)}
+                    >
+                      {formatRelativeTime(f.updatedAt)}
                     </td>
                   </tr>
                 ))}
