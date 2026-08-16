@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/toast';
+import { useToast } from '@/components/ui/toast-context';
 import { api } from '@/lib/api';
 import type { ResourceType, ShareRecord } from '@/types';
 
@@ -116,7 +116,7 @@ export function ShareDialog({
 
         <div className="grid gap-2">
           <div className="flex items-center gap-2 text-sm font-medium">
-            <Link2 className="h-4 w-4" /> Public link
+            <Link2 className="w-4 h-4" /> Public link
           </div>
           {publicLink ? (
             <div className="flex items-center gap-2">
@@ -126,10 +126,10 @@ export function ShareDialog({
                 className="text-xs"
               />
               <Button size="icon" variant="outline" onClick={() => copyLink(publicLink.token!)}>
-                <Copy className="h-4 w-4" />
+                <Copy className="w-4 h-4" />
               </Button>
               <Button size="icon" variant="outline" onClick={() => revoke(publicLink.id)}>
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="w-4 h-4" />
               </Button>
             </div>
           ) : (
@@ -145,9 +145,9 @@ export function ShareDialog({
           )}
         </div>
 
-        <div className="grid gap-2 border-t pt-4">
+        <div className="grid gap-2 pt-4 border-t">
           <div className="flex items-center gap-2 text-sm font-medium">
-            <Mail className="h-4 w-4" /> Invite specific people
+            <Mail className="w-4 h-4" /> Invite specific people
           </div>
           <form onSubmit={invite} className="flex items-center gap-2">
             <Input
@@ -177,7 +177,7 @@ export function ShareDialog({
                       className="text-muted-foreground hover:text-destructive"
                       title="Revoke access"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </li>
                 )),
