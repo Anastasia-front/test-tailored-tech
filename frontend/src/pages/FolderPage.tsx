@@ -12,9 +12,9 @@ import { MoveFileDialog } from '@/components/MoveFileDialog';
 import { RenameDialog } from '@/components/RenameDialog';
 import { ShareDialog } from '@/components/ShareDialog';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/toast';
+import { useToast } from '@/components/ui/toast-context';
 import { UploadDropzone } from '@/components/UploadDropzone';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-context';
 import { api, ApiError } from '@/lib/api';
 import type { FileNode, FolderContents, FolderNode } from '@/types';
 

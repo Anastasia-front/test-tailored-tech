@@ -6,7 +6,7 @@ import { GoogleButton } from '@/components/GoogleButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth-context';
 import { ApiError } from '@/lib/api';
 
 export function SignupPage() {
@@ -66,13 +66,13 @@ export function SignupPage() {
           {submitting ? 'Creating account...' : 'Create account'}
         </Button>
       </form>
-      <div className="my-4 flex items-center gap-3 text-xs text-muted-foreground">
-        <div className="h-px flex-1 bg-border" />
+      <div className="flex items-center gap-3 my-4 text-xs text-muted-foreground">
+        <div className="flex-1 h-px bg-border" />
         OR
-        <div className="h-px flex-1 bg-border" />
+        <div className="flex-1 h-px bg-border" />
       </div>
       <GoogleButton />
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-6 text-sm text-center text-muted-foreground">
         Already have an account?{' '}
         <Link to="/login" className="font-medium text-primary hover:underline">
           Sign in

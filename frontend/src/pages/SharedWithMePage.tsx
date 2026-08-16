@@ -22,16 +22,16 @@ export function SharedWithMePage() {
   return (
     <div className="min-h-screen bg-muted/20">
       <Header />
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="max-w-6xl px-4 py-8 mx-auto">
         <h1 className="mb-1 text-2xl font-semibold">Shared with you</h1>
         <p className="mb-6 text-sm text-muted-foreground">
           Content other people have explicitly invited you to view.
         </p>
 
         {entries === null ? (
-          <div className="py-16 text-center text-sm text-muted-foreground">Loading...</div>
+          <div className="py-16 text-sm text-center text-muted-foreground">Loading...</div>
         ) : entries.length === 0 ? (
-          <EmptyState icon={<Users2 className="h-6 w-6" />} title="Nothing shared with you yet" />
+          <EmptyState icon={<Users2 className="w-6 h-6" />} title="Nothing shared with you yet" />
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {entries.map((entry) => {
@@ -39,12 +39,12 @@ export function SharedWithMePage() {
               const content = (
                 <Card className="transition-shadow hover:shadow-md">
                   <CardHeader className="flex-row items-center gap-3 space-y-0">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted">
-                      <Icon className="h-4 w-4" />
+                    <div className="flex items-center justify-center rounded-md h-9 w-9 bg-muted">
+                      <Icon className="w-4 h-4" />
                     </div>
                     <div>
-                      <CardTitle className="line-clamp-1 text-sm">{entry.resourceName}</CardTitle>
-                      <div className="mt-1 flex items-center gap-2">
+                      <CardTitle className="text-sm line-clamp-1">{entry.resourceName}</CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary">Viewer</Badge>
                         <span className="text-xs text-muted-foreground">
                           {formatDate(entry.createdAt)}

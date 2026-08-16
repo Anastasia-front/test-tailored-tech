@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useToast } from '@/components/ui/toast';
+import { useToast } from '@/components/ui/toast-context';
 import { api } from '@/lib/api';
 import { formatBytes, formatDate } from '@/lib/utils';
 import type { DataRoomSummary } from '@/types';
