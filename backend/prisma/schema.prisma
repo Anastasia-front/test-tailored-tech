@@ -1,0 +1,167 @@
+// Data Room MVP - Prisma schema
+// Design decision: a "Data Room" is modeled as its own top-level container
+// (not just "the user's root folder") because a single user may want multiple
+// independent rooms (e.g. one per deal/client), each with its own sharing
+// settings and its own folder tree. Every DataRoom owns exactly one implicit
+// root Folder (folder.parentId = null, folder.dataRoomId = <room>), so all
+// nesting logic (folders inside folders) is uniform — the room itself never
+// directly holds files, only its root folder does.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+enum ShareType {
+  PUBLIC_LINK
+  PERMISSIONED
+}
+
+// Kept generic today (view-only). Adding EDITOR later is additive — see
+// README "How it scales" for how this enum extends without a schema rewrite.
+enum ShareRole {
+  VIEWER
+}
+
+enum ResourceType {
+  DATA_ROOM
+  FOLDER
+  FILE
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String? // null for Google-only accounts
+  name         String?
+  avatarUrl    String?
+  provider     AuthProvider @default(LOCAL)
+  googleId     String?      @unique
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  dataRooms      DataRoom[]
+  shareGrantsMade Share[]      @relation("ShareCreatedBy")
+  shareGrantsGot  ShareGrantee[]
+
+  @@index([email])
+}
+
+model DataRoom {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Root folder is created alongside the room; folders.dataRoomId scopes the
+  // whole tree so subtree queries never have to cross data rooms.
+  folders Folder[]
+  shares  Share[]
+
+  @@index([ownerId])
+}
+
+model Folder {
+  id         String   @id @default(uuid())
+  name       String
+  dataRoomId String
+  dataRoom   DataRoom @relation(fields: [dataRoomId], references: [id], onDelete: Cascade)
+  parentId   String?
+  parent     Folder?  @relation("FolderChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children   Folder[] @relation("FolderChildren")
+  isRoot     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  files  File[]
+  shares Share[]
+
+  // Denormalized aggregate counters for the whole subtree, maintained on
+  // write (upload/delete/move) rather than recomputed with a recursive CTE
+  // on every read. See README "How it scales" for the tradeoff discussion.
+  totalSizeBytes BigInt @default(0)
+  totalItemCount Int    @default(0)
+
+  @@index([dataRoomId])
+  @@index([parentId])
+  @@unique([parentId, name, dataRoomId], map: "folder_unique_name_in_parent")
+}
+
+model File {
+  id          String   @id @default(uuid())
+  name        String
+  sizeBytes   BigInt
+  mimeType    String
+  s3Key       String   @unique
+  folderId    String
+  folder      Folder   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  uploadedById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  shares Share[]
+
+  @@index([folderId])
+  @@unique([folderId, name], map: "file_unique_name_in_folder")
+}
+
+// Polymorphic share target: exactly one of dataRoomId / folderId / fileId is
+// set (enforced in application code), discriminated by resourceType.
+model Share {
+  id            String       @id @default(uuid())
+  resourceType  ResourceType
+  dataRoomId    String?
+  dataRoom      DataRoom?    @relation(fields: [dataRoomId], references: [id], onDelete: Cascade)
+  folderId      String?
+  folder        Folder?      @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  fileId        String?
+  file          File?        @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  shareType ShareType
+  role      ShareRole @default(VIEWER) // forward-compatible; only VIEWER used today
+
+  // PUBLIC_LINK
+  token     String?   @unique
+
+  // Lifecycle
+  revoked   Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  createdById String
+  createdBy   User    @relation("ShareCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+
+  grantees ShareGrantee[]
+
+  @@index([dataRoomId])
+  @@index([folderId])
+  @@index([fileId])
+  @@index([token])
+}
+
+// PERMISSIONED shares: one row per invited user (by email). A grantee row can
+// point at a User once they've signed up, or just hold the invited email
+// before then (invite-by-email-before-signup).
+model ShareGrantee {
+  id       String  @id @default(uuid())
+  shareId  String
+  share    Share   @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  email    String
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@unique([shareId, email])
+  @@index([email])
+}
