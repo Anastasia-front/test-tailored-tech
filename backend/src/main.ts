@@ -4,6 +4,13 @@ import cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 
+// Prisma returns BigInt for totalSizeBytes/sizeBytes columns; JSON.stringify
+// throws on BigInt by default. File/folder sizes stay well under
+// Number.MAX_SAFE_INTEGER (9 PB), so converting to number here is safe.
+(BigInt.prototype as unknown as { toJSON: () => number }).toJSON = function () {
+  return Number(this);
+};
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
