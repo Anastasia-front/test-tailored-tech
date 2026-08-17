@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/components/ui/toast-context';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { formatBytes, formatDate } from '@/lib/utils';
 import type { DataRoomSummary } from '@/types';
 
@@ -24,16 +24,22 @@ export function DataRoomsPage() {
   const { toast } = useToast();
   const [owned, setOwned] = React.useState<DataRoomSummary[] | null>(null);
   const [shared, setShared] = React.useState<DataRoomSummary[]>([]);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
   const [createOpen, setCreateOpen] = React.useState(false);
   const [shareTarget, setShareTarget] = React.useState<DataRoomSummary | null>(null);
   const [deleteTarget, setDeleteTarget] = React.useState<DataRoomSummary | null>(null);
 
   const load = React.useCallback(async () => {
-    const data = await api.get<{ owned: DataRoomSummary[]; shared: DataRoomSummary[] }>(
-      '/data-rooms',
-    );
-    setOwned(data.owned);
-    setShared(data.shared);
+    try {
+      const data = await api.get<{ owned: DataRoomSummary[]; shared: DataRoomSummary[] }>(
+        '/data-rooms',
+      );
+      setOwned(data.owned);
+      setShared(data.shared);
+      setLoadError(null);
+    } catch (err) {
+      setLoadError(err instanceof ApiError ? err.message : 'Failed to load data rooms.');
+    }
   }, []);
 
   React.useEffect(() => {
@@ -56,7 +62,18 @@ export function DataRoomsPage() {
           </Button>
         </div>
 
-        {owned === null ? (
+        {loadError ? (
+          <EmptyState
+            icon={<FolderLock className="h-6 w-6" />}
+            title="Couldn't load data rooms"
+            description={loadError}
+            action={
+              <Button size="sm" onClick={() => load()}>
+                Try again
+              </Button>
+            }
+          />
+        ) : owned === null ? (
           <div className="py-16 text-center text-sm text-muted-foreground">Loading...</div>
         ) : owned.length === 0 ? (
           <EmptyState

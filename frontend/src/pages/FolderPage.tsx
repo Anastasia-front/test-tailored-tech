@@ -26,6 +26,7 @@ export function FolderPage() {
 
   const [contents, setContents] = React.useState<FolderContents | null>(null);
   const [notFound, setNotFound] = React.useState(false);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
   const [createFolderOpen, setCreateFolderOpen] = React.useState(false);
   const [uploadOpen, setUploadOpen] = React.useState(false);
 
@@ -44,9 +45,12 @@ export function FolderPage() {
       const data = await api.get<FolderContents>(`/folders/${folderId}`);
       setContents(data);
       setNotFound(false);
+      setLoadError(null);
     } catch (err) {
       if (err instanceof ApiError && err.status === 404) {
         setNotFound(true);
+      } else {
+        setLoadError(err instanceof ApiError ? err.message : 'Failed to load this folder.');
       }
     }
   }, [folderId]);
@@ -67,6 +71,26 @@ export function FolderPage() {
             action={
               <Button size="sm" onClick={() => navigate('/')}>
                 Back to data rooms
+              </Button>
+            }
+          />
+        </main>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-muted/20">
+        <Header />
+        <main className="mx-auto max-w-6xl px-4 py-16">
+          <EmptyState
+            icon={<PackageOpen className="h-6 w-6" />}
+            title="Couldn't load this folder"
+            description={loadError}
+            action={
+              <Button size="sm" onClick={() => load()}>
+                Try again
               </Button>
             }
           />
