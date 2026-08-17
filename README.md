@@ -6,10 +6,10 @@ Monorepo: `backend` (NestJS + Prisma + PostgreSQL) and `frontend` (React + Vite 
 
 ## Demo
 
-Not deployed yet. Fill in once live:
+- Frontend: https://test-tailored-tech.vercel.app
+- Backend/API: https://test-tailored-tech.onrender.com
 
-- Frontend:
-- Backend/API:
+Backend is on Render's free tier, so the first request after idling can take ~30s to wake up.
 
 ## Tech Stack
 
@@ -88,9 +88,9 @@ npm run dev             # http://localhost:5173
 
 Don't put real values for any of these in this file — only `.env.example` is committed.
 
-### Deployment config
+### Deployment
 
-A [`Dockerfile`](backend/Dockerfile) builds and runs the backend (runs `prisma migrate deploy` on boot, then starts the server) — works with Render, Railway, Fly, or similar. The frontend has a [`vercel.json`](frontend/vercel.json) with SPA rewrites for client-side routing. Neither has been deployed as part of this submission.
+Backend runs on Render from [`backend/Dockerfile`](backend/Dockerfile) (builds the app, runs `prisma migrate deploy` on boot, then starts the server). Database is a hosted Postgres instance on Supabase. Frontend is on Vercel, built with [`frontend/vercel.json`](frontend/vercel.json) handling SPA rewrites for client-side routing. See [Demo](#demo) for live URLs.
 
 ## Data Model
 
