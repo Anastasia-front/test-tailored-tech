@@ -20,10 +20,16 @@ export class AuthController {
   ) {}
 
   private setAuthCookie(res: Response, token: string) {
+    // Frontend and backend live on different domains in production (Vercel /
+    // Render), so the cookie must be sameSite=none to be sent on cross-site
+    // fetch requests. That requires secure=true, which breaks local http dev,
+    // so sameSite=lax + secure=false is used there instead (frontend/backend
+    // both run on localhost, which browsers treat as same-site).
+    const isProduction = this.config.get('NODE_ENV') === 'production';
     res.cookie(COOKIE_NAME, token, {
       httpOnly: true,
-      secure: this.config.get('NODE_ENV') === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: COOKIE_MAX_AGE_MS,
       path: '/',
     });
@@ -47,7 +53,12 @@ export class AuthController {
   @Post('logout')
   @HttpCode(200)
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie(COOKIE_NAME, { path: '/' });
+    const isProduction = this.config.get('NODE_ENV') === 'production';
+    res.clearCookie(COOKIE_NAME, {
+      path: '/',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    });
     return { success: true };
   }
 
